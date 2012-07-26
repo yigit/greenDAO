@@ -2,7 +2,7 @@
  * Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)
  *
  * This file is part of greenDAO Generator.
- * 
+ *
  * greenDAO Generator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -11,20 +11,15 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.greenrobot.daogenerator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
 import de.greenrobot.daogenerator.Property.PropertyBuilder;
+
+import java.util.*;
 
 /**
  * Model class for an entity: a Java data object mapped to a data base table. A new entity is added to a {@link Schema}
@@ -40,13 +35,14 @@ import de.greenrobot.daogenerator.Property.PropertyBuilder;
  * <li>{@link #setSuperclass(String)} to specify a class of which the entity will extend from</li>
  * <li>Various setXXX methods</li>
  * </ul>
- * 
+ *
  * @see <a href="http://greendao-orm.com/documentation/modelling-entities/">Modelling Entities (Documentation page)</a>
  * @see <a href="http://greendao-orm.com/documentation/relations/">Relations (Documentation page)</a>
  */
 public class Entity {
     private final Schema schema;
     private final String className;
+    private final String classNameBase;
     private final List<Property> properties;
     private List<Property> propertiesColumns;
     private final List<Property> propertiesPk;
@@ -81,6 +77,7 @@ public class Entity {
     Entity(Schema schema, String className) {
         this.schema = schema;
         this.className = className;
+        this.classNameBase = className + "Base";
         properties = new ArrayList<Property>();
         propertiesPk = new ArrayList<Property>();
         propertiesNonPk = new ArrayList<Property>();
@@ -270,6 +267,10 @@ public class Entity {
         return className;
     }
 
+    public String getClassNameBase() {
+        return classNameBase;
+    }
+
     public List<Property> getProperties() {
         return properties;
     }
@@ -364,7 +365,7 @@ public class Entity {
     public void setSkipTableCreation(boolean skipTableCreation) {
         this.skipTableCreation = skipTableCreation;
     }
-    
+
     public boolean isSkipTableCreation() {
         return skipTableCreation;
     }
