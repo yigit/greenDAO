@@ -2,7 +2,7 @@
  * Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)
  *
  * This file is part of greenDAO Generator.
- * 
+ *
  * greenDAO Generator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -11,11 +11,15 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.greenrobot.daogenerator;
+
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.Template;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,13 +31,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.Template;
-
 /**
  * Once you have your model created, use this class to generate entities and DAOs.
- * 
+ *
  * @author Markus
  */
 public class DaoGenerator {
@@ -46,6 +46,7 @@ public class DaoGenerator {
     private Template templateDaoMaster;
     private Template templateDaoSession;
     private Template templateEntity;
+    private Template templateEntityBase;
     private Template templateDaoUnitTest;
 
     public DaoGenerator() throws IOException {
@@ -64,6 +65,7 @@ public class DaoGenerator {
         templateDao = config.getTemplate("dao.ftl");
         templateDaoMaster = config.getTemplate("dao-master.ftl");
         templateDaoSession = config.getTemplate("dao-session.ftl");
+        templateEntityBase = config.getTemplate("entity-base.ftl");
         templateEntity = config.getTemplate("entity.ftl");
         templateDaoUnitTest = config.getTemplate("dao-unit-test.ftl");
     }
@@ -75,15 +77,21 @@ public class DaoGenerator {
     }
 
     /** Generates all entities and DAOs for the given schema. */
-    public void generateAll(Schema schema, String outDir) throws Exception {
-        generateAll(schema, outDir, null);
+    public void generateAll(Schema schema, String outDir, String outDirModel) throws Exception {
+        generateAll(schema, outDir, outDirModel, null);
     }
 
     /** Generates all entities and DAOs for the given schema. */
-    public void generateAll(Schema schema, String outDir, String outDirTest) throws Exception {
+    public void generateAll(Schema schema, String outDir) throws Exception {
+        generateAll(schema, outDir, null, null);
+    }
+
+    /** Generates all entities and DAOs for the given schema. */
+    public void generateAll(Schema schema, String outDir, String outDirModel, String outDirTest) throws Exception {
         long start = System.currentTimeMillis();
 
         File outDirFile = toFileForceExists(outDir);
+        File outDirModelFile = outDirModel == null ? outDirFile : toFileForceExists(outDirModel);
 
         File outDirTestFile = null;
         if (outDirTest != null) {
@@ -99,7 +107,8 @@ public class DaoGenerator {
         for (Entity entity : entities) {
             generate(templateDao, outDirFile, entity.getJavaPackageDao(), entity.getClassNameDao(), schema, entity);
             if (!entity.isProtobuf() && !entity.isSkipGeneration()) {
-                generate(templateEntity, outDirFile, entity.getJavaPackage(), entity.getClassName(), schema, entity);
+                generate(templateEntity, outDirModelFile, entity.getJavaPackage(), entity.getClassName(), schema, entity);
+                generate(templateEntityBase, outDirFile, entity.getJavaPackage(), entity.getClassNameBase(), schema, entity);
             }
             if (outDirTestFile != null && !entity.isSkipGenerationTest()) {
                 String javaPackageTest = entity.getJavaPackageTest();
