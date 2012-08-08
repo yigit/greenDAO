@@ -2,7 +2,7 @@
  * Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)
  *
  * This file is part of greenDAO Generator.
- * 
+ *
  * greenDAO Generator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -11,11 +11,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.greenrobot.daogenerator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** Model class for an entity's property: a Java property mapped to a data base column. */
 public class Property {
@@ -51,6 +54,21 @@ public class Property {
         public PropertyBuilder primaryKeyDesc() {
             property.primaryKey = true;
             property.pkDesc = true;
+            return this;
+        }
+
+        public PropertyBuilder addFieldAnnotation(Annotation annotation) {
+            property.fieldAnnotations.add(annotation);
+            return this;
+        }
+
+        public PropertyBuilder addSetterAnnotation(Annotation annotation) {
+            property.setterAnnotations.add(annotation);
+            return this;
+        }
+
+        public PropertyBuilder addGetterAnnotation(Annotation annotation) {
+            property.getterAnnotations.add(annotation);
             return this;
         }
 
@@ -123,6 +141,10 @@ public class Property {
     private boolean unique;
     private boolean notNull;
 
+    private List<Annotation> fieldAnnotations = new ArrayList<Annotation>();
+    private List<Annotation> setterAnnotations = new ArrayList<Annotation>();
+    private List<Annotation> getterAnnotations = new ArrayList<Annotation>();
+
     /** Initialized in 2nd pass */
     private String constraints;
 
@@ -191,6 +213,18 @@ public class Property {
 
     public Entity getEntity() {
         return entity;
+    }
+
+    public List<Annotation> getFieldAnnotations() {
+        return fieldAnnotations;
+    }
+
+    public List<Annotation> getSetterAnnotations() {
+        return setterAnnotations;
+    }
+
+    public List<Annotation> getGetterAnnotations() {
+        return getterAnnotations;
     }
 
     void init2ndPass() {

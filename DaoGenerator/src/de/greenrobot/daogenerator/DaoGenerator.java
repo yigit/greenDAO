@@ -146,6 +146,7 @@ public class DaoGenerator {
             Map<String, Object> root = new HashMap<String, Object>();
             root.put("schema", schema);
             root.put("entity", entity);
+            root.put("annotation_no_name", Annotation.NO_NAME);
 
             if (entity != null && entity.getHasKeepSections()) {
                 checkKeepSections(file, root);

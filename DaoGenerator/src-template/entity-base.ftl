@@ -1,3 +1,4 @@
+<#include "*/annotation.ftl">
 <#--
 
 Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)
@@ -17,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
+
 <#assign toBindType = {"Boolean":"Long", "Byte":"Long", "Short":"Long", "Int":"Long", "Long":"Long", "Float":"Double", "Double":"Double", "String":"String", "ByteArray":"Blob" }/>
 <#assign toCursorType = {"Boolean":"Short", "Byte":"Short", "Short":"Short", "Int":"Int", "Long":"Long", "Float":"Float", "Double":"Double", "String":"String", "ByteArray":"Blob" }/>
 <#assign complexTypes = ["String", "ByteArray", "Date"]/>
@@ -47,6 +49,7 @@ import ${additionalImport};
 /**
  * Entity mapped to table ${entity.tableName}.
  */
+<@print_annotations entity.annotations, ""/>
 abstract public class ${entity.classNameBase}<#if
 entity.superclass?has_content> extends ${entity.superclass} </#if><#if
 entity.interfacesToImplement?has_content> implements <#list entity.interfacesToImplement
@@ -56,6 +59,7 @@ as ifc>${ifc}<#if ifc_has_next>, </#if></#list></#if> {
 <#if property.notNull && complexTypes?seq_contains(property.propertyType)>
     /** Not-null value. */
 </#if>
+    <@print_annotations property.fieldAnnotations, "    "/>
     protected ${property.javaType} ${property.propertyName};
 </#list>
 
@@ -86,6 +90,7 @@ ${keepFields!}    // KEEP FIELDS END
 
 </#if>
 <#if entity.constructors>
+    <@print_annotations entity.emptyConstructorAnnotations, "    "/>
     public ${entity.classNameBase}() {
     }
 <#if entity.propertiesPk?has_content && entity.propertiesPk?size != entity.properties?size>
@@ -98,6 +103,7 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
     }
 </#if>
 
+    <@print_annotations entity.fullConstructorAnnotations, "    "/>
     public ${entity.classNameBase}(<#list entity.properties as
 property>${property.javaType} ${property.propertyName}<#if property_has_next>, </#if></#list>) {
 <#list entity.properties as property>
@@ -118,6 +124,7 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
 <#if property.notNull && complexTypes?seq_contains(property.propertyType)>
     /** Not-null value. */
 </#if>
+    <@print_annotations property.getterAnnotations, "    "/>
     public ${property.javaType} get${property.propertyName?cap_first}() {
         return ${property.propertyName};
     }
@@ -125,6 +132,7 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
 <#if property.notNull && complexTypes?seq_contains(property.propertyType)>
     /** Not-null value; ensure this value is available before it is saved to the database. */
 </#if>
+    <@print_annotations property.setterAnnotations, "    "/>
     public void set${property.propertyName?cap_first}(${property.javaType} ${property.propertyName}) {
         this.${property.propertyName} = ${property.propertyName};
     }

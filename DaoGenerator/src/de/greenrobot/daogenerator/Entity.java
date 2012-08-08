@@ -55,6 +55,9 @@ public class Entity {
     private final Collection<String> additionalImportsEntity;
     private final Collection<String> additionalImportsDao;
     private final List<String> interfacesToImplement;
+    private final List<Annotation> annotations;
+    private final List<Annotation> emptyConstructorAnnotations;
+    private final List<Annotation> fullConstructorAnnotations;
 
     private String tableName;
     private String classNameDao;
@@ -65,6 +68,7 @@ public class Entity {
     private Property pkProperty;
     private String pkType;
     private String superclass;
+
 
     private boolean protobuf;
     private boolean constructors;
@@ -89,6 +93,9 @@ public class Entity {
         additionalImportsEntity = new TreeSet<String>();
         additionalImportsDao = new TreeSet<String>();
         interfacesToImplement = new ArrayList<String>();
+        annotations = new ArrayList<Annotation>();
+        emptyConstructorAnnotations = new ArrayList<Annotation>();
+        fullConstructorAnnotations = new ArrayList<Annotation>();
         constructors = true;
     }
 
@@ -131,6 +138,23 @@ public class Entity {
     public PropertyBuilder addDateProperty(String propertyName) {
         return addProperty(PropertyType.Date, propertyName);
     }
+
+    public Entity addAnnotation(Annotation annotation) {
+        this.annotations.add(annotation);
+        return this;
+    }
+
+    public Entity addEmptyConstructorAnnotation(Annotation annotation) {
+        this.emptyConstructorAnnotations.add(annotation);
+        return this;
+    }
+
+    public Entity addFullConstructorAnnotation(Annotation annotation) {
+        this.fullConstructorAnnotations.add(annotation);
+        return this;
+    }
+
+
 
     public PropertyBuilder addProperty(PropertyType propertyType, String propertyName) {
         if (!propertyNames.add(propertyName)) {
@@ -430,6 +454,18 @@ public class Entity {
 
     public void implementsSerializable() {
         interfacesToImplement.add("java.io.Serializable");
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public List<Annotation> getEmptyConstructorAnnotations() {
+        return emptyConstructorAnnotations;
+    }
+
+    public List<Annotation> getFullConstructorAnnotations() {
+        return fullConstructorAnnotations;
     }
 
     public String getSuperclass() {
