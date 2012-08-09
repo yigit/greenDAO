@@ -15,17 +15,13 @@
  */
 package de.greenrobot.daogenerator.gentest;
 
-import de.greenrobot.daogenerator.DaoGenerator;
-import de.greenrobot.daogenerator.Entity;
-import de.greenrobot.daogenerator.Property;
-import de.greenrobot.daogenerator.Schema;
-import de.greenrobot.daogenerator.ToMany;
+import de.greenrobot.daogenerator.*;
 
 /**
  * Generates entities and DAOs for the example project DaoExample.
- * 
+ *
  * Run it as a Java application (not Android).
- * 
+ *
  * @author Markus
  */
 public class ExampleDaoGenerator {
@@ -41,10 +37,20 @@ public class ExampleDaoGenerator {
 
     private static void addNote(Schema schema) {
         Entity note = schema.addEntity("Note");
+
         note.addIdProperty();
-        note.addStringProperty("text").notNull();
-        note.addStringProperty("comment");
-        note.addDateProperty("date");
+        note.addStringProperty("text").notNull().addSetterAnnotation(new Annotation("test5", "key1", "value1"));
+        note.addStringProperty("comment").addFieldAnnotation(new Annotation("JSONIgnore"));
+        note.addDateProperty("date").addSetterAnnotation(new Annotation("Test", "key1", "value1"));
+        note.addAnnotation(new Annotation("Test"));
+        note.addAnnotation(new Annotation("Test2", "singleValueeee"));
+        note.addAnnotation(new Annotation("Test3", "key1", "5", "key2","\"value2\""));
+        note.addAnnotation(new Annotation("Test4", "key1", null, "key2","\"value2\""));
+        note.addProperty(PropertyType.StringList, "userIds");
+
+        note.addEmptyConstructorAnnotation(new Annotation("Deprecated"));
+        note.addFullConstructorAnnotation(new Annotation("Inject", "Context"));
+
     }
 
     private static void addCustomerOrder(Schema schema) {

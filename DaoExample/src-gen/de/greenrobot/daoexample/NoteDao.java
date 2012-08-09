@@ -27,6 +27,7 @@ public class NoteDao extends AbstractDao<Note, Long> {
         public final static Property Text = new Property(1, String.class, "text", false, "TEXT");
         public final static Property Comment = new Property(2, String.class, "comment", false, "COMMENT");
         public final static Property Date = new Property(3, java.util.Date.class, "date", false, "DATE");
+        public final static Property UserIds = new Property(4, java.util.List<String>.class, "userIds", false, "USER_IDS");
     };
 
 
@@ -45,7 +46,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'TEXT' TEXT NOT NULL ," + // 1: text
                 "'COMMENT' TEXT," + // 2: comment
-                "'DATE' INTEGER);"); // 3: date
+                "'DATE' INTEGER," + // 3: date
+                "'USER_IDS' TEXT);"); // 4: userIds
     }
 
     /** Drops the underlying database table. */
@@ -74,56 +76,42 @@ public class NoteDao extends AbstractDao<Note, Long> {
         if (date != null) {
             stmt.bindLong(4, date.getTime());
         }
-    }
+ 
+        java.util.List<String> userIds = entity.getUserIds();
+        if (userIds != null) {
+            stmt.bind
+Expression toBindType[property.propertyType] is undefined on line 138, column 24 in dao.ftl.
+The problematic instruction:
+----------
+==> ${toBindType[property.propertyType]} [on line 138, column 22 in dao.ftl]
+----------
 
-    /** @inheritdoc */
-    @Override
-    public Long readKey(Cursor cursor, int offset) {
-        return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
-    }    
-
-    /** @inheritdoc */
-    @Override
-    public Note readEntity(Cursor cursor, int offset) {
-        Note entity = new Note( //
-            cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
-            cursor.getString(offset + 1), // text
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // comment
-            cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)) // date
-        );
-        return entity;
-    }
-     
-    /** @inheritdoc */
-    @Override
-    public void readEntity(Cursor cursor, Note entity, int offset) {
-        entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setText(cursor.getString(offset + 1));
-        entity.setComment(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setDate(cursor.isNull(offset + 3) ? null : new java.util.Date(cursor.getLong(offset + 3)));
-     }
-    
-    /** @inheritdoc */
-    @Override
-    protected Long updateKeyAfterInsert(Note entity, long rowId) {
-        entity.setId(rowId);
-        return rowId;
-    }
-    
-    /** @inheritdoc */
-    @Override
-    public Long getKey(Note entity) {
-        if(entity != null) {
-            return entity.getId();
-        } else {
-            return null;
-        }
-    }
-
-    /** @inheritdoc */
-    @Override    
-    protected boolean isEntityUpdateable() {
-        return true;
-    }
-    
-}
+Java backtrace for programmers:
+----------
+freemarker.core.InvalidReferenceException: Expression toBindType[property.propertyType] is undefined on line 138, column 24 in dao.ftl.
+	at freemarker.core.TemplateObject.assertNonNull(TemplateObject.java:125)
+	at freemarker.core.Expression.getStringValue(Expression.java:118)
+	at freemarker.core.Expression.getStringValue(Expression.java:93)
+	at freemarker.core.DollarVariable.accept(DollarVariable.java:76)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.MixedContent.accept(MixedContent.java:92)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.IfBlock.accept(IfBlock.java:82)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.IteratorBlock$Context.runLoop(IteratorBlock.java:179)
+	at freemarker.core.Environment.visit(Environment.java:428)
+	at freemarker.core.IteratorBlock.accept(IteratorBlock.java:102)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.MixedContent.accept(MixedContent.java:92)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.Environment.process(Environment.java:199)
+	at freemarker.template.Template.process(Template.java:237)
+	at de.greenrobot.daogenerator.DaoGenerator.generate(DaoGenerator.java:157)
+	at de.greenrobot.daogenerator.DaoGenerator.generateAll(DaoGenerator.java:108)
+	at de.greenrobot.daogenerator.DaoGenerator.generateAll(DaoGenerator.java:86)
+	at de.greenrobot.daogenerator.gentest.ExampleDaoGenerator.main(ExampleDaoGenerator.java:35)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:120)

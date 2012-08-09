@@ -4,14 +4,20 @@ package de.greenrobot.daoexample;
 /**
  * Entity mapped to table NOTE.
  */
+@Test
+@Test2( singleValueeee )
+@Test3( key2 = "value2", key1 = 5 )
+@Test4( key2 = "value2", key1 = null )
 abstract public class NoteBase {
 
     protected Long id;
     /** Not-null value. */
     protected String text;
+    @JSONIgnore
     protected String comment;
     protected java.util.Date date;
 
+    @Deprecated
     public NoteBase() {
     }
 
@@ -19,6 +25,7 @@ abstract public class NoteBase {
         this.id = id;
     }
 
+    @Inject( Context )
     public NoteBase(Long id, String text, String comment, java.util.Date date) {
         this.id = id;
         this.text = text;
@@ -40,6 +47,7 @@ abstract public class NoteBase {
     }
 
     /** Not-null value; ensure this value is available before it is saved to the database. */
+    @test5( key1 = value1 )
     public void setText(String text) {
         this.text = text;
     }
@@ -56,6 +64,7 @@ abstract public class NoteBase {
         return date;
     }
 
+    @Test( key1 = value1 )
     public void setDate(java.util.Date date) {
         this.date = date;
     }

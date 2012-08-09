@@ -139,6 +139,10 @@ public class Entity {
         return addProperty(PropertyType.Date, propertyName);
     }
 
+    public PropertyBuilder addStringList(String propertyName) {
+        return addProperty(PropertyType.StringList, propertyName);
+    }
+
     public Entity addAnnotation(Annotation annotation) {
         this.annotations.add(annotation);
         return this;
