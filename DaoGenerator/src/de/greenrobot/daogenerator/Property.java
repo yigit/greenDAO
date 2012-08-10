@@ -67,6 +67,12 @@ public class Property {
             return this;
         }
 
+        public PropertyBuilder addSetterGetterAnnotation(Annotation annotation) {
+            property.setterAnnotations.add(annotation);
+            property.getterAnnotations.add(annotation);
+            return this;
+        }
+
         public PropertyBuilder addGetterAnnotation(Annotation annotation) {
             property.getterAnnotations.add(annotation);
             return this;

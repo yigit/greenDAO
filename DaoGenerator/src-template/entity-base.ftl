@@ -229,7 +229,7 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
         }
-        myDao.delete(this);
+        myDao.delete((${entity.className})this);
     }
 
     /** Convenient call for {@link AbstractDao#update(Object)}. Entity must attached to an entity context. */
@@ -237,7 +237,7 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
         }
-        myDao.update(this);
+        myDao.update((${entity.className})this);
     }
 
     /** Convenient call for {@link AbstractDao#refresh(Object)}. Entity must attached to an entity context. */
@@ -245,7 +245,7 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
         }
-        myDao.refresh(this);
+        myDao.refresh((${entity.className})this);
     }
 
 </#if>
