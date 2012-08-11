@@ -93,7 +93,7 @@ abstract public class OrderBase {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
         }
-        myDao.delete(this);
+        myDao.delete((Order)this);
     }
 
     /** Convenient call for {@link AbstractDao#update(Object)}. Entity must attached to an entity context. */
@@ -101,7 +101,7 @@ abstract public class OrderBase {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
         }
-        myDao.update(this);
+        myDao.update((Order)this);
     }
 
     /** Convenient call for {@link AbstractDao#refresh(Object)}. Entity must attached to an entity context. */
@@ -109,7 +109,7 @@ abstract public class OrderBase {
         if (myDao == null) {
             throw new DaoException("Entity is detached from DAO context");
         }
-        myDao.refresh(this);
+        myDao.refresh((Order)this);
     }
 
 }

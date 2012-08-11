@@ -16,6 +16,7 @@ abstract public class NoteBase {
     @JSONIgnore
     protected String comment;
     protected java.util.Date date;
+    protected java.util.List<String> userIds;
 
     @Deprecated
     public NoteBase() {
@@ -26,11 +27,12 @@ abstract public class NoteBase {
     }
 
     @Inject( Context )
-    public NoteBase(Long id, String text, String comment, java.util.Date date) {
+    public NoteBase(Long id, String text, String comment, java.util.Date date, java.util.List<String> userIds) {
         this.id = id;
         this.text = text;
         this.comment = comment;
         this.date = date;
+        this.userIds = userIds;
     }
 
     public Long getId() {
@@ -67,6 +69,14 @@ abstract public class NoteBase {
     @Test( key1 = value1 )
     public void setDate(java.util.Date date) {
         this.date = date;
+    }
+
+    public java.util.List<String> getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(java.util.List<String> userIds) {
+        this.userIds = userIds;
     }
 
 }
