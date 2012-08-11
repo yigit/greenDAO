@@ -147,6 +147,8 @@ public class Property {
     private boolean unique;
     private boolean notNull;
 
+    private Entity backingEntity;
+
     private List<Annotation> fieldAnnotations = new ArrayList<Annotation>();
     private List<Annotation> setterAnnotations = new ArrayList<Annotation>();
     private List<Annotation> getterAnnotations = new ArrayList<Annotation>();
@@ -231,6 +233,18 @@ public class Property {
 
     public List<Annotation> getGetterAnnotations() {
         return getterAnnotations;
+    }
+
+    public Entity getBackingEntity() {
+        return backingEntity;
+    }
+
+    public void setBackingEntity(Entity backingEntity, String propertyName) {
+        if(propertyType != PropertyType.ByteArray) {
+            throw new RuntimeException("can only serialize byte array properties");
+        }
+        backingEntity.implementsSerializable();
+        this.backingEntity = backingEntity;
     }
 
     void init2ndPass() {

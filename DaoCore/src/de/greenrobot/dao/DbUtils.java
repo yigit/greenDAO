@@ -16,15 +16,13 @@
 
 package de.greenrobot.dao;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import java.io.*;
 
 /** Database utils, for example to execute SQL scripts */
 // TODO add unit tests
@@ -36,7 +34,7 @@ public class DbUtils {
 
     /**
      * Calls {@link #executeSqlScript(Context, SQLiteDatabase, String, boolean)} with transactional set to true.
-     * 
+     *
      * @return number of statements executed.
      */
     public static int executeSqlScript(Context context, SQLiteDatabase db, String assetFilename) throws IOException {
@@ -48,7 +46,7 @@ public class DbUtils {
      * multiple SQL statements. Statements are split using a simple regular expression (something like
      * "semicolon before a line break"), not by analyzing the SQL syntax. This will work for many SQL files, but check
      * yours.
-     * 
+     *
      * @return number of statements executed.
      */
     public static int executeSqlScript(Context context, SQLiteDatabase db, String assetFilename, boolean transactional)
@@ -91,7 +89,7 @@ public class DbUtils {
 
     /**
      * Copies all available data from in to out without closing any stream.
-     * 
+     *
      * @return number of bytes copied
      */
     public static int copyAllBytes(InputStream in, OutputStream out) throws IOException {
@@ -130,6 +128,43 @@ public class DbUtils {
             DaoLog.d(dump);
         } finally {
             cursor.close();
+        }
+    }
+
+    public static byte[] serializeObject(Object o) {
+        if(o == null) {
+            return null;
+        }
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(o);
+            out.close();
+
+            // Get the bytes of the serialized object
+            byte[] buf = bos.toByteArray();
+
+            return buf;
+        } catch(IOException ioe) {
+            Log.d("DBUTIL", "error" + ioe == null ? "null" : ioe.getMessage());
+            return null;
+        }
+    }
+
+    public static Object deserializeObject(byte[] b) {
+        if(b == null) {
+            return null;
+        }
+        try {
+            ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(b));
+            Object object = in.readObject();
+            in.close();
+
+            return object;
+        } catch(ClassNotFoundException cnfe) {
+            return null;
+        } catch(IOException ioe) {
+            return null;
         }
     }
 

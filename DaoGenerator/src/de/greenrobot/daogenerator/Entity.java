@@ -58,6 +58,7 @@ public class Entity {
     private final List<Annotation> annotations;
     private final List<Annotation> emptyConstructorAnnotations;
     private final List<Annotation> fullConstructorAnnotations;
+    private final List<SerializedProperty> serializedProperties;
 
     private String tableName;
     private String classNameDao;
@@ -96,6 +97,7 @@ public class Entity {
         annotations = new ArrayList<Annotation>();
         emptyConstructorAnnotations = new ArrayList<Annotation>();
         fullConstructorAnnotations = new ArrayList<Annotation>();
+        serializedProperties = new ArrayList<SerializedProperty>();
         constructors = true;
     }
 
@@ -141,6 +143,23 @@ public class Entity {
 
     public PropertyBuilder addStringList(String propertyName) {
         return addProperty(PropertyType.StringList, propertyName);
+    }
+
+    public SerializedProperty addSerializedProperty(Property property, String propertyName, String className) {
+        SerializedProperty serializedProperty = new SerializedProperty(property, propertyName, className);
+        this.serializedProperties.add(serializedProperty);
+        return serializedProperty;
+    }
+
+    public SerializedProperty addSerializedProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
+        Property property = this.addProperty(PropertyType.ByteArray, "__" + propertyName)
+                .addSetterGetterAnnotation(basePropertyAnnotation)
+                .getProperty();
+        return this.addSerializedProperty(property, propertyName, className);
+    }
+
+    public List<SerializedProperty> getSerializedProperties() {
+        return serializedProperties;
     }
 
     public Entity addAnnotation(Annotation annotation) {
@@ -633,6 +652,24 @@ public class Entity {
         for (ToMany toMany : toManyRelations) {
             Entity targetEntity = toMany.getTargetEntity();
             checkAdditionalImportsEntityTargetEntity(targetEntity);
+        }
+
+        for(Property property : properties) {
+            checkAdditionalImportsProperty(property);
+        }
+    }
+
+    private void checkAdditionalImportsProperty(Property property) {
+        checkAddionalImportsAnnotaion(property.getFieldAnnotations());
+        checkAddionalImportsAnnotaion(property.getGetterAnnotations());
+        checkAddionalImportsAnnotaion(property.getSetterAnnotations());
+    }
+
+    private void checkAddionalImportsAnnotaion(List<Annotation> annotations) {
+        for(Annotation annotation : annotations) {
+            if(annotation.getPackage() != null) {
+                additionalImportsEntity.add(annotation.getPackage());
+            }
         }
     }
 

@@ -2,7 +2,7 @@
  * Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)
  *
  * This file is part of greenDAO Generator.
- * 
+ *
  * greenDAO Generator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -11,18 +11,13 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.greenrobot.daogenerator;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 /** Internal API */
 public class DaoUtil {
@@ -38,13 +33,13 @@ public class DaoUtil {
         }
         return builder.toString().toUpperCase();
     }
-    
+
     public static byte[] readAllBytes(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         copyAllBytes(in, out);
         return out.toByteArray();
     }
-    
+
     public static byte[] readAllBytes(File file) throws IOException {
         FileInputStream is = new FileInputStream(file);
         try {
@@ -53,7 +48,7 @@ public class DaoUtil {
             is.close();
         }
     }
-    
+
     public static byte[] readAllBytes(String filename) throws IOException {
         FileInputStream is = new FileInputStream(filename);
         try {
@@ -62,10 +57,10 @@ public class DaoUtil {
             is.close();
         }
     }
-    
+
     /**
      * Copies all available data from in to out without closing any stream.
-     * 
+     *
      * @return number of bytes copied
      */
     public static int copyAllBytes(InputStream in, OutputStream out) throws IOException {
@@ -81,7 +76,5 @@ public class DaoUtil {
         }
         return byteCount;
     }
-    
-
 
 }

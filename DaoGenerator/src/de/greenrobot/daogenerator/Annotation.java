@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
  */
 public class Annotation {
     private String name;
+    protected String _package;
     private Map<String, String> parameters = new HashMap<String, String>();
     public static Pattern QUOTE = Pattern.compile("\"");
 
@@ -30,6 +31,14 @@ public class Annotation {
                 this.parameters.put(params[i], params[i + 1] == null ? NULL : params[i + 1]);
             }
         }
+    }
+
+    public String getPackage() {
+        return _package;
+    }
+
+    public void setPackage(String _package) {
+        this._package = _package;
     }
 
     public Annotation(String name) {
