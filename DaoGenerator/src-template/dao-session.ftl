@@ -1,19 +1,19 @@
 <#--
 
-Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)     
-                                                                           
-This file is part of greenDAO Generator.                                   
-                                                                           
-greenDAO Generator is free software: you can redistribute it and/or modify 
-it under the terms of the GNU General Public License as published by       
-the Free Software Foundation, either version 3 of the License, or          
-(at your option) any later version.                                        
-greenDAO Generator is distributed in the hope that it will be useful,      
-but WITHOUT ANY WARRANTY; without even the implied warranty of             
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              
-GNU General Public License for more details.                               
-                                                                           
-You should have received a copy of the GNU General Public License          
+Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)
+
+This file is part of greenDAO Generator.
+
+greenDAO Generator is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+greenDAO Generator is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
 along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
@@ -40,18 +40,18 @@ import ${entity.javaPackageDao}.${entity.classNameDao};
 
 /**
  * {@inheritDoc}
- * 
+ *
  * @see de.greenrobot.dao.AbstractDaoSession
  */
 public class DaoSession extends AbstractDaoSession {
 
 <#list schema.entities as entity>
     private final DaoConfig ${entity.classNameDao?uncap_first}Config;
-</#list>        
+</#list>
 
 <#list schema.entities as entity>
     private final ${entity.classNameDao} ${entity.classNameDao?uncap_first};
-</#list>        
+</#list>
 
     public DaoSession(SQLiteDatabase db, IdentityScopeType type, Map<Class<? extends AbstractDao<?, ?>>, DaoConfig>
             daoConfigMap) {
@@ -61,27 +61,34 @@ public class DaoSession extends AbstractDaoSession {
         ${entity.classNameDao?uncap_first}Config = daoConfigMap.get(${entity.classNameDao}.class).clone();
         ${entity.classNameDao?uncap_first}Config.initIdentityScope(type);
 
-</#list>        
+</#list>
 <#list schema.entities as entity>
         ${entity.classNameDao?uncap_first} = new ${entity.classNameDao}<#--
 -->(${entity.classNameDao?uncap_first}Config, this);
-</#list>        
+</#list>
 
 <#list schema.entities as entity>
         registerDao(${entity.className}.class, ${entity.classNameDao?uncap_first});
-</#list>        
+</#list>
     }
-    
+
     public void clear() {
 <#list schema.entities as entity>
         ${entity.classNameDao?uncap_first}Config.getIdentityScope().clear();
-</#list>    
+</#list>
     }
+
+    public void deleteAllData() {
+<#list schema.entities as entity>
+        ${entity.classNameDao?uncap_first}.deleteAll();
+</#list>
+    }
+
 
 <#list schema.entities as entity>
     public ${entity.classNameDao} get${entity.classNameDao?cap_first}() {
         return ${entity.classNameDao?uncap_first};
     }
 
-</#list>        
+</#list>
 }
