@@ -285,7 +285,9 @@ ${keepMethods!}    // KEEP METHODS END
     public void onBeforeSave() {
         //you can override this method and do some stuff if you want to :)
         <#list entity.serializedProperties as serialization>
-        ${serialization.property.propertyName} = DbUtils.serializeObject(${serialization.propertyName});
+        if(${serialization.property.propertyName} == null) {
+            ${serialization.property.propertyName} = DbUtils.serializeObject(${serialization.propertyName});
+        }
         </#list>
 
     }
