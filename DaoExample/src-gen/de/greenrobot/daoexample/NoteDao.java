@@ -23,11 +23,11 @@ public class NoteDao extends AbstractDao<Note, Long> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property Text = new Property(1, String.class, "text", false, "TEXT");
-        public final static Property Comment = new Property(2, String.class, "comment", false, "COMMENT");
-        public final static Property Date = new Property(3, java.util.Date.class, "date", false, "DATE");
-        public final static Property UserIds = new Property(4, java.util.List<String>.class, "userIds", false, "USER_IDS");
+        public final static Property Id =new Property(0, Long.class , "id", true, "_id");
+        public final static Property Text =new Property(1, String.class , "text", false, "TEXT");
+        public final static Property Comment =new Property(2, String.class , "comment", false, "COMMENT");
+        public final static Property Date =new Property(3, java.util.Date.class , "date", false, "DATE");
+        public final static Property UserIds =new Property(4, java.util.List.class , "userIds", false, "USER_IDS");
     };
 
 
@@ -60,6 +60,7 @@ public class NoteDao extends AbstractDao<Note, Long> {
     @Override
     protected void bindValues(SQLiteStatement stmt, Note entity) {
         stmt.clearBindings();
+        entity.onBeforeSave();
  
         Long id = entity.getId();
         if (id != null) {

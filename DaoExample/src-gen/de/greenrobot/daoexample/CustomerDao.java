@@ -23,8 +23,8 @@ public class CustomerDao extends AbstractDao<Customer, Long> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property Name = new Property(1, String.class, "name", false, "NAME");
+        public final static Property Id =new Property(0, Long.class , "id", true, "_id");
+        public final static Property Name =new Property(1, String.class , "name", false, "NAME");
     };
 
     private DaoSession daoSession;
@@ -57,6 +57,7 @@ public class CustomerDao extends AbstractDao<Customer, Long> {
     @Override
     protected void bindValues(SQLiteStatement stmt, Customer entity) {
         stmt.clearBindings();
+        entity.onBeforeSave();
  
         Long id = entity.getId();
         if (id != null) {

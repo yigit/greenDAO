@@ -28,9 +28,9 @@ public class OrderDao extends AbstractDao<Order, Long> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property Date = new Property(1, java.util.Date.class, "date", false, "DATE");
-        public final static Property CustomerId = new Property(2, long.class, "customerId", false, "CUSTOMER_ID");
+        public final static Property Id =new Property(0, Long.class , "id", true, "_id");
+        public final static Property Date =new Property(1, java.util.Date.class , "date", false, "DATE");
+        public final static Property CustomerId =new Property(2, long.class , "customerId", false, "CUSTOMER_ID");
     };
 
     private DaoSession daoSession;
@@ -65,6 +65,7 @@ public class OrderDao extends AbstractDao<Order, Long> {
     @Override
     protected void bindValues(SQLiteStatement stmt, Order entity) {
         stmt.clearBindings();
+        entity.onBeforeSave();
  
         Long id = entity.getId();
         if (id != null) {
