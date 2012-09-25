@@ -85,5 +85,28 @@ abstract public class NoteBase {
         this.userIds = userIds;
     }
 
+    public void updateNotNull(Note other) {
+        if(other.id != null) {
+            this.id = other.id;
+        }
+
+        if(other.text != null) {
+            this.text = other.text;
+        }
+
+        if(other.comment != null) {
+            this.comment = other.comment;
+        }
+
+        if(other.date != null) {
+            this.date = other.date;
+        }
+
+        if(other.userIds != null) {
+            this.userIds = other.userIds;
+        }
+
+        // relationships
+    }
 
 }

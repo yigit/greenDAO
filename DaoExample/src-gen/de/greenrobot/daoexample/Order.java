@@ -12,8 +12,8 @@ public class Order extends OrderBase  {
         super(id);
     }
 
-    public Order(Long id, java.util.Date date, long customerId) {
-        super(id, date, customerId);
+    public Order(Long id, java.util.Date date, long customerId, byte[] serializedCustomer) {
+        super(id, date, customerId, serializedCustomer);
     }
 
 }

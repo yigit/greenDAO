@@ -31,6 +31,7 @@ public class OrderDao extends AbstractDao<Order, Long> {
         public final static Property Id =new Property(0, Long.class , "id", true, "_id");
         public final static Property Date =new Property(1, java.util.Date.class , "date", false, "DATE");
         public final static Property CustomerId =new Property(2, long.class , "customerId", false, "CUSTOMER_ID");
+        public final static Property SerializedCustomer =new Property(3, byte[].class , "serializedCustomer", false, "SERIALIZED_CUSTOMER");
     };
 
     private DaoSession daoSession;
@@ -52,7 +53,8 @@ public class OrderDao extends AbstractDao<Order, Long> {
         db.execSQL("CREATE TABLE " + constraint + "'ORDERS' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'DATE' INTEGER," + // 1: date
-                "'CUSTOMER_ID' INTEGER NOT NULL );"); // 2: customerId
+                "'CUSTOMER_ID' INTEGER NOT NULL ," + // 2: customerId
+                "'SERIALIZED_CUSTOMER' BLOB);"); // 3: serializedCustomer
     }
 
     /** Drops the underlying database table. */
@@ -79,6 +81,12 @@ public class OrderDao extends AbstractDao<Order, Long> {
 
         }
         stmt.bindLong(3, entity.getCustomerId());
+ 
+        byte[] serializedCustomer = entity.getSerializedCustomer();
+        if (serializedCustomer != null) {
+            stmt.bindBlob(4, serializedCustomer);
+
+        }
     }
 
     @Override
@@ -100,7 +108,8 @@ public class OrderDao extends AbstractDao<Order, Long> {
 
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0) , // id
             cursor.isNull(offset + 1) ? null : new java.util.Date( cursor.getLong(offset + 1) ) , // date
-            cursor.getLong(offset + 2) // customerId
+            cursor.getLong(offset + 2) , // customerId
+            cursor.isNull(offset + 3) ? null : cursor.getBlob(offset + 3) // serializedCustomer
         );
         return entity;
     }
@@ -111,6 +120,7 @@ public class OrderDao extends AbstractDao<Order, Long> {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0) );
         entity.setDate(cursor.isNull(offset + 1) ? null : new java.util.Date( cursor.getLong(offset + 1) ) );
         entity.setCustomerId(cursor.getLong(offset + 2) );
+        entity.setSerializedCustomer(cursor.isNull(offset + 3) ? null : cursor.getBlob(offset + 3) );
      }
 
     /** @inheritdoc */

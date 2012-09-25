@@ -64,6 +64,8 @@ public class ExampleDaoGenerator {
         Property orderDate = order.addDateProperty("date").getProperty();
         Property customerId = order.addLongProperty("customerId").notNull().getProperty();
         order.addToOne(customer, customerId);
+        Property serializedCustomer = order.addProperty(PropertyType.ByteArray, "serializedCustomer").getProperty();
+        order.addSerializedProperty(serializedCustomer, "customer2", "Customer");
 
         ToMany customerToOrders = customer.addToMany(order, customerId);
         customerToOrders.setName("orders");

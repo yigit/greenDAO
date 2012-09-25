@@ -4,6 +4,7 @@ import de.greenrobot.daoexample.DaoSession;
 import de.greenrobot.dao.DaoException;
 
 
+import de.greenrobot.dao.DbUtils;
 
 
 
@@ -16,7 +17,10 @@ abstract public class OrderBase {
     protected Long id;
     protected java.util.Date date;
     protected long customerId;
+    protected byte[] serializedCustomer;
 
+    //denormalized properties
+    private Customer customer2;
 
 
     /** Used to resolve relations */
@@ -36,10 +40,11 @@ abstract public class OrderBase {
         this.id = id;
     }
 
-    public OrderBase(Long id, java.util.Date date, long customerId) {
+    public OrderBase(Long id, java.util.Date date, long customerId, byte[] serializedCustomer) {
         this.id = id;
         this.date = date;
         this.customerId = customerId;
+        this.serializedCustomer = serializedCustomer;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -70,6 +75,14 @@ abstract public class OrderBase {
 
     public void setCustomerId(long customerId) {
         this.customerId = customerId;
+    }
+
+    public byte[] getSerializedCustomer() {
+        return serializedCustomer;
+    }
+
+    public void setSerializedCustomer(byte[] serializedCustomer) {
+        this.serializedCustomer = serializedCustomer;
     }
 
     /** To-one relationship, resolved on first access. */
@@ -118,5 +131,40 @@ abstract public class OrderBase {
         myDao.refresh((Order)this);
     }
 
+    public void updateNotNull(Order other) {
+        if(other.id != null) {
+            this.id = other.id;
+        }
+
+        if(other.date != null) {
+            this.date = other.date;
+        }
+
+        if(other.customerId != null) {
+            this.customerId = other.customerId;
+        }
+
+        //serialized
+        if(other.getCustomer2() != null) {
+            setCustomer2(other.getCustomer2());
+        }
+
+        // relationships
+        if(other.getCustomer() != null) {
+            this.setCustomer(other.getCustomer());
+        }
+    }
+    public Customer getCustomer2() {
+        if(customer2 == null && serializedCustomer != null) {
+           customer2  = (Customer) DbUtils.deserializeObject(serializedCustomer);
+           serializedCustomer = null; //clear memory, before save, we'll re-serialize anyways if needed
+        }
+        return customer2;
+    }
+
+    public void setCustomer2(Customer customer2) {
+        this.customer2 = customer2;
+        serializedCustomer = null; //onBeforeSave will do serialization
+    }
 
 }

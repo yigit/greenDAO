@@ -105,5 +105,19 @@ abstract public class CustomerBase {
         myDao.refresh((Customer)this);
     }
 
+    public void updateNotNull(Customer other) {
+        if(other.id != null) {
+            this.id = other.id;
+        }
+
+        if(other.name != null) {
+            this.name = other.name;
+        }
+
+        // relationships
+        if(other.getOrders() != null) {
+            this.setOrders(other.getOrders());
+        }
+    }
 
 }
