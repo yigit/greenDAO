@@ -269,6 +269,32 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
     }
 
 </#if>
+    public void updateNotNull(${entity.className} other) {
+        <#list entity.properties as property>
+            <#if property.serialized??>
+        //serialized
+        if(other.get${property.serialized.propertyName?cap_first}() != null) {
+            set${property.serialized.propertyName?cap_first}(other.get${property.serialized.propertyName?cap_first}());
+        }
+            <#else>
+        if(other.${property.propertyName} != null) {
+            this.${property.propertyName} = other.${property.propertyName};
+        }
+            </#if>
+
+        </#list>
+        // relationships
+        <#list entity.toOneRelations as toOne>
+        if(other.get${toOne.name?cap_first}() != null) {
+            this.set${toOne.name?cap_first}(other.get${toOne.name?cap_first}());
+        }
+        </#list>
+        <#list entity.toManyRelations as toMany>
+        if(other.get${toMany.name?cap_first}() != null) {
+            ${toMany.name} = (other.get${toMany.name?cap_first}());
+        }
+        </#list>
+    }
 <#--
 ##########################################
 ########## Serialized field Operations ######
@@ -285,9 +311,7 @@ ${keepMethods!}    // KEEP METHODS END
     public void onBeforeSave() {
         //you can override this method and do some stuff if you want to :)
         <#list entity.serializedProperties as serialization>
-        if(${serialization.property.propertyName} == null) {
-            ${serialization.property.propertyName} = DbUtils.serializeObject(${serialization.propertyName});
-        }
+        ${serialization.property.propertyName} = DbUtils.serializeObject(${serialization.propertyName});
         </#list>
 
     }

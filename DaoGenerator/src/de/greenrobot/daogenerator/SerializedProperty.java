@@ -20,6 +20,7 @@ public class SerializedProperty {
         this.property = property;
         this.propertyName = propertyName;
         this.className = className;
+        property.setSerialized(this);
     }
 
     public Property getProperty() {

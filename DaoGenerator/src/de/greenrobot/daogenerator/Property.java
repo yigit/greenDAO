@@ -146,6 +146,7 @@ public class Property {
 
     private boolean unique;
     private boolean notNull;
+    private SerializedProperty serialized;
 
     private Entity backingEntity;
 
@@ -173,6 +174,14 @@ public class Property {
 
     public PropertyType getPropertyType() {
         return propertyType;
+    }
+
+    public SerializedProperty getSerialized() {
+        return serialized;
+    }
+
+    public void setSerialized(SerializedProperty serialized) {
+        this.serialized = serialized;
     }
 
     public void setPropertyType(PropertyType propertyType) {
