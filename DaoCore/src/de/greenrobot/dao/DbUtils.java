@@ -131,23 +131,39 @@ public class DbUtils {
         }
     }
 
+    public static byte[] serialize(Object o) throws IOException {
+        ByteArrayOutputStream bos = null;
+        try {
+            ObjectOutput out = null;
+            bos = new ByteArrayOutputStream();
+            out = new ObjectOutputStream(bos);
+            out.writeObject(o);
+            // Get the bytes of the serialized object
+            return bos.toByteArray();
+        } finally {
+            closeQuietly(bos);
+        }
+    }
+
     public static byte[] serializeObject(Object o) {
         if(o == null) {
             return null;
         }
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            ObjectOutput out = new ObjectOutputStream(bos);
-            out.writeObject(o);
-            out.close();
-
-            // Get the bytes of the serialized object
-            byte[] buf = bos.toByteArray();
-
-            return buf;
+            return serialize(o);
         } catch(IOException ioe) {
             Log.d("DBUTIL", "error" + ioe == null ? "null" : ioe.getMessage());
             return null;
+        }
+    }
+
+    public static Object deserialize(byte[] b) throws IOException, ClassNotFoundException {
+        ObjectInputStream in = null;
+        try {
+            in = new ObjectInputStream(new ByteArrayInputStream(b));
+            return in.readObject();
+        } finally {
+            closeQuietly(in);
         }
     }
 
@@ -156,11 +172,7 @@ public class DbUtils {
             return null;
         }
         try {
-            ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(b));
-            Object object = in.readObject();
-            in.close();
-
-            return object;
+            return deserialize(b);
         } catch(ClassNotFoundException cnfe) {
             return null;
         } catch(IOException ioe) {
@@ -168,4 +180,14 @@ public class DbUtils {
         }
     }
 
+    private static void closeQuietly(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            }
+            catch (Exception e) {
+                //
+            }
+        }
+    }
 }
