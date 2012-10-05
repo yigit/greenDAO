@@ -12,8 +12,8 @@ public class Note extends NoteBase  {
         super(id);
     }
 
-    public Note(Long id, String text, String comment, java.util.Date date, java.util.List<String> userIds) {
-        super(id, text, comment, date, userIds);
+    public Note(Long id, String text, String comment, java.util.Date date, Integer __gender, java.util.List<String> userIds) {
+        super(id, text, comment, date, __gender, userIds);
     }
 
 }

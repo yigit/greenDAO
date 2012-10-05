@@ -130,4 +130,9 @@ public class NoteActivity extends ListActivity {
         cursor.requery();
     }
 
+	public static class Gender {
+		male,
+		female
+	}
+
 }

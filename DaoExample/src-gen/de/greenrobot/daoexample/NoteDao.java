@@ -27,7 +27,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
         public final static Property Text =new Property(1, String.class , "text", false, "TEXT");
         public final static Property Comment =new Property(2, String.class , "comment", false, "COMMENT");
         public final static Property Date =new Property(3, java.util.Date.class , "date", false, "DATE");
-        public final static Property UserIds =new Property(4, java.util.List.class , "userIds", false, "USER_IDS");
+        public final static Property __gender =new Property(4, Integer.class , "__gender", false, "__GENDER");
+        public final static Property UserIds =new Property(5, java.util.List.class , "userIds", false, "USER_IDS");
     };
 
 
@@ -47,7 +48,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
                 "'TEXT' TEXT NOT NULL ," + // 1: text
                 "'COMMENT' TEXT," + // 2: comment
                 "'DATE' INTEGER," + // 3: date
-                "'USER_IDS' TEXT);"); // 4: userIds
+                "'__GENDER' INTEGER," + // 4: __gender
+                "'USER_IDS' TEXT);"); // 5: userIds
     }
 
     /** Drops the underlying database table. */
@@ -81,9 +83,15 @@ public class NoteDao extends AbstractDao<Note, Long> {
 
         }
  
+        Integer __gender = entity.get__gender();
+        if (__gender != null) {
+            stmt.bindLong(5, __gender);
+
+        }
+ 
         java.util.List<String> userIds = entity.getUserIds();
         if (userIds != null) {
-            stmt.bindString(5, serializeStringList(userIds));
+            stmt.bindString(6, serializeStringList(userIds));
 
         }
     }
@@ -103,7 +111,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
             cursor.getString(offset + 1) , // text
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2) , // comment
             cursor.isNull(offset + 3) ? null : new java.util.Date( cursor.getLong(offset + 3) ) , // date
-            cursor.isNull(offset + 4) ? null : deserializeStringList( cursor.getString(offset + 4) ) // userIds
+            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4) , // __gender
+            cursor.isNull(offset + 5) ? null : deserializeStringList( cursor.getString(offset + 5) ) // userIds
         );
         return entity;
     }
@@ -115,7 +124,8 @@ public class NoteDao extends AbstractDao<Note, Long> {
         entity.setText(cursor.getString(offset + 1) );
         entity.setComment(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2) );
         entity.setDate(cursor.isNull(offset + 3) ? null : new java.util.Date( cursor.getLong(offset + 3) ) );
-        entity.setUserIds(cursor.isNull(offset + 4) ? null : deserializeStringList( cursor.getString(offset + 4) ));
+        entity.set__gender(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4) );
+        entity.setUserIds(cursor.isNull(offset + 5) ? null : deserializeStringList( cursor.getString(offset + 5) ));
      }
 
     /** @inheritdoc */

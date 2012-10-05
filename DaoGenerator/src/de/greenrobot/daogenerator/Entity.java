@@ -59,6 +59,7 @@ public class Entity {
     private final List<Annotation> emptyConstructorAnnotations;
     private final List<Annotation> fullConstructorAnnotations;
     private final List<SerializedProperty> serializedProperties;
+    private final List<EnumProperty> enumProperties;
 
     private String tableName;
     private String classNameDao;
@@ -98,6 +99,7 @@ public class Entity {
         emptyConstructorAnnotations = new ArrayList<Annotation>();
         fullConstructorAnnotations = new ArrayList<Annotation>();
         serializedProperties = new ArrayList<SerializedProperty>();
+        enumProperties = new ArrayList<EnumProperty>();
         constructors = true;
     }
 
@@ -158,8 +160,25 @@ public class Entity {
         return this.addSerializedProperty(property, propertyName, className);
     }
 
+    public EnumProperty addEnumProperty(Property property, String propertyName, String className) {
+        EnumProperty enumProperty = new EnumProperty(property, propertyName, className);
+        this.enumProperties.add(enumProperty);
+        return enumProperty;
+    }
+
+    public EnumProperty addEnumProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
+        Property property = this.addProperty(PropertyType.Int, "__" + propertyName)
+                .addSetterGetterAnnotation(basePropertyAnnotation)
+                .getProperty();
+        return this.addEnumProperty(property, propertyName, className);
+    }
+
     public List<SerializedProperty> getSerializedProperties() {
         return serializedProperties;
+    }
+
+    public List<EnumProperty> getEnumProperties() {
+        return enumProperties;
     }
 
     public Entity addAnnotation(Annotation annotation) {

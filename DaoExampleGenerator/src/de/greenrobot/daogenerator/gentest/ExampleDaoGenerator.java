@@ -46,6 +46,7 @@ public class ExampleDaoGenerator {
         note.addAnnotation(new Annotation("Test2", "singleValueeee"));
         note.addAnnotation(new Annotation("Test3", "key1", "5", "key2","\"value2\""));
         note.addAnnotation(new Annotation("Test4", "key1", null, "key2","\"value2\""));
+        note.addEnumProperty("gender", "NoteActivity.Gender", new Annotation("Test", "key1", "value1")).addImport("de.greenrobot.daoexample.NoteActivity");
         note.addProperty(PropertyType.StringList, "userIds");
 
         note.addEmptyConstructorAnnotation(new Annotation("Deprecated"));

@@ -147,6 +147,7 @@ public class Property {
     private boolean unique;
     private boolean notNull;
     private SerializedProperty serialized;
+    private EnumProperty enumarated;
 
     private Entity backingEntity;
 
@@ -182,6 +183,14 @@ public class Property {
 
     public void setSerialized(SerializedProperty serialized) {
         this.serialized = serialized;
+    }
+
+    public EnumProperty getEnumarated() {
+        return enumarated;
+    }
+
+    public void setEnumarated(EnumProperty enumarated) {
+        this.enumarated = enumarated;
     }
 
     public void setPropertyType(PropertyType propertyType) {
