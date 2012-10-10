@@ -104,9 +104,14 @@ public class SqlUtils {
     }
 
     /** Creates SELECT COUNT(*) with a trailing space. */
-    public static String createSqlSelectCountStar(String tablename) {
+    public static String createSqlSelectCountStar(String tablename, String tablePrefixOrNull) {
         StringBuilder builder = new StringBuilder("SELECT COUNT(*) FROM ");
-        return builder.append(tablename).append(' ').toString();
+        builder.append(tablename).append(' ');
+        if(tablePrefixOrNull != null) {
+            builder.append(tablePrefixOrNull).append(' ');
+        }
+        return builder.toString();
+
     }
 
     public static String createSqlDelete(String tablename, String[] columns) {

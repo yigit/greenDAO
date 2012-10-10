@@ -362,9 +362,9 @@ public class QueryBuilder<T> {
      */
     public CountQuery<T> buildCount() {
         String tablename = dao.getTablename();
-        String baseSql = SqlUtils.createSqlSelectCountStar(tablename);
+        String baseSql = SqlUtils.createSqlSelectCountStar(tablename, tablePrefix);
         StringBuilder builder = new StringBuilder(baseSql);
-        appendWhereClause(builder, tablename);
+        appendWhereClause(builder, tablePrefix);
         String sql = builder.toString();
 
         if (LOG_SQL) {
