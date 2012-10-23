@@ -660,14 +660,14 @@ public abstract class AbstractDao<T, K> {
         return db;
     }
 
-    protected List<String> deserializeStringList(String stringList) {
+    public static List<String> deserializeStringList(String stringList) {
         if(stringList == null) {
             return Lists.newArrayList();
         }
         return Lists.newArrayList(StringUtils.split(stringList, ","));
     }
 
-    protected String serializeStringList(List<String> items) {
+    public static String serializeStringList(List<String> items) {
         if(items == null) {
             return null;
         }

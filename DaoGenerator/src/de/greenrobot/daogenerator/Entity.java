@@ -17,6 +17,7 @@
  */
 package de.greenrobot.daogenerator;
 
+import com.sun.istack.internal.Nullable;
 import de.greenrobot.daogenerator.Property.PropertyBuilder;
 
 import java.util.*;
@@ -153,11 +154,16 @@ public class Entity {
         return serializedProperty;
     }
 
-    public SerializedProperty addSerializedProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
-        Property property = this.addProperty(PropertyType.ByteArray, "__" + propertyName)
-                .addSetterGetterAnnotation(basePropertyAnnotation)
-                .getProperty();
-        return this.addSerializedProperty(property, propertyName, className);
+    public SerializedProperty addSerializedProperty(String propertyName, String className) {
+        return addSerializedProperty(propertyName, className, null);
+
+    }
+    public SerializedProperty addSerializedProperty(String propertyName, String className, @Nullable Annotation basePropertyAnnotation) {
+        PropertyBuilder pb = this.addProperty(PropertyType.ByteArray, "__" + propertyName);
+        if(basePropertyAnnotation != null) {
+                pb.addSetterGetterAnnotation(basePropertyAnnotation);
+        }
+        return this.addSerializedProperty(pb.getProperty(), propertyName, className);
     }
 
     public EnumProperty addEnumProperty(Property property, String propertyName, String className) {
@@ -166,11 +172,15 @@ public class Entity {
         return enumProperty;
     }
 
-    public EnumProperty addEnumProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
-        Property property = this.addProperty(PropertyType.Int, "__" + propertyName)
-                .addSetterGetterAnnotation(basePropertyAnnotation)
-                .getProperty();
-        return this.addEnumProperty(property, propertyName, className);
+    public EnumProperty addEnumProperty(String propertyName, String className) {
+        return addEnumProperty(propertyName, className, null);
+    }
+    public EnumProperty addEnumProperty(String propertyName, String className, @Nullable Annotation basePropertyAnnotation) {
+        PropertyBuilder pb = this.addProperty(PropertyType.Int, "__" + propertyName);
+        if(basePropertyAnnotation != null) {
+                pb.addSetterGetterAnnotation(basePropertyAnnotation);
+        }
+        return this.addEnumProperty(pb.getProperty(), propertyName, className);
     }
 
     public List<SerializedProperty> getSerializedProperties() {
