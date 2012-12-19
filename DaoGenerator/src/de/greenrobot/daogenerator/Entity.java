@@ -17,7 +17,6 @@
  */
 package de.greenrobot.daogenerator;
 
-import com.sun.istack.internal.Nullable;
 import de.greenrobot.daogenerator.Property.PropertyBuilder;
 
 import java.util.*;
@@ -158,7 +157,7 @@ public class Entity {
         return addSerializedProperty(propertyName, className, null);
 
     }
-    public SerializedProperty addSerializedProperty(String propertyName, String className, @Nullable Annotation basePropertyAnnotation) {
+    public SerializedProperty addSerializedProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
         PropertyBuilder pb = this.addProperty(PropertyType.ByteArray, "__" + propertyName);
         if(basePropertyAnnotation != null) {
                 pb.addSetterGetterAnnotation(basePropertyAnnotation);
@@ -175,7 +174,7 @@ public class Entity {
     public EnumProperty addEnumProperty(String propertyName, String className) {
         return addEnumProperty(propertyName, className, null);
     }
-    public EnumProperty addEnumProperty(String propertyName, String className, @Nullable Annotation basePropertyAnnotation) {
+    public EnumProperty addEnumProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
         PropertyBuilder pb = this.addProperty(PropertyType.Int, "__" + propertyName);
         if(basePropertyAnnotation != null) {
                 pb.addSetterGetterAnnotation(basePropertyAnnotation);
