@@ -34,8 +34,8 @@ import ${schema.defaultJavaPackageDao}.DaoSession;
 import de.greenrobot.dao.DaoException;
 
 </#if>
-<#if entity.additionalImportsEntity?has_content>
-<#list entity.additionalImportsEntity as additionalImport>
+<#if entity.additionalImportsEntityBase?has_content>
+<#list entity.additionalImportsEntityBase as additionalImport>
 import ${additionalImport};
 </#list>
 </#if>

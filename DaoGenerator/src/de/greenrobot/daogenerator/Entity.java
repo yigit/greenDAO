@@ -52,6 +52,7 @@ public class Entity {
     private final List<ToOne> toOneRelations;
     private final List<ToMany> toManyRelations;
     private final List<ToMany> incomingToManyRelations;
+    private final Collection<String> additionalImportsEntityBase;
     private final Collection<String> additionalImportsEntity;
     private final Collection<String> additionalImportsDao;
     private final List<String> interfacesToImplement;
@@ -92,6 +93,7 @@ public class Entity {
         toOneRelations = new ArrayList<ToOne>();
         toManyRelations = new ArrayList<ToMany>();
         incomingToManyRelations = new ArrayList<ToMany>();
+        additionalImportsEntityBase = new TreeSet<String>();
         additionalImportsEntity = new TreeSet<String>();
         additionalImportsDao = new TreeSet<String>();
         interfacesToImplement = new ArrayList<String>();
@@ -481,12 +483,16 @@ public class Entity {
         return hasKeepSections;
     }
 
-    public Collection<String> getAdditionalImportsEntity() {
-        return additionalImportsEntity;
+    public Collection<String> getAdditionalImportsEntityBase() {
+        return additionalImportsEntityBase;
     }
 
     public Collection<String> getAdditionalImportsDao() {
         return additionalImportsDao;
+    }
+
+    public Collection<String> getAdditionalImportsEntity() {
+        return additionalImportsEntity;
     }
 
     public void setHasKeepSections(Boolean hasKeepSections) {
@@ -665,7 +671,7 @@ public class Entity {
 
     private void init3rdPassAdditionalImports() {
         if (active && !javaPackage.equals(javaPackageDao)) {
-            additionalImportsEntity.add(javaPackageDao + "." + classNameDao);
+            additionalImportsEntityBase.add(javaPackageDao + "." + classNameDao);
         }
 
         for (ToOne toOne : toOneRelations) {
@@ -685,6 +691,16 @@ public class Entity {
         for(Property property : properties) {
             checkAdditionalImportsProperty(property);
         }
+
+        checkAddionalImportsAnnotaion(annotations);
+
+        //for entity itself not the base class. we need to import all class annotations
+        for(Annotation annotation : annotations) {
+            if(annotation.getPackage() != null) {
+                additionalImportsEntity.add(annotation.getPackage());
+            }
+        }
+
     }
 
     private void checkAdditionalImportsProperty(Property property) {
@@ -696,17 +712,17 @@ public class Entity {
     private void checkAddionalImportsAnnotaion(List<Annotation> annotations) {
         for(Annotation annotation : annotations) {
             if(annotation.getPackage() != null) {
-                additionalImportsEntity.add(annotation.getPackage());
+                additionalImportsEntityBase.add(annotation.getPackage());
             }
         }
     }
 
     private void checkAdditionalImportsEntityTargetEntity(Entity targetEntity) {
         if (!targetEntity.getJavaPackage().equals(javaPackage)) {
-            additionalImportsEntity.add(targetEntity.getJavaPackage() + "." + targetEntity.getClassName());
+            additionalImportsEntityBase.add(targetEntity.getJavaPackage() + "." + targetEntity.getClassName());
         }
         if (!targetEntity.getJavaPackageDao().equals(javaPackage)) {
-            additionalImportsEntity.add(targetEntity.getJavaPackageDao() + "." + targetEntity.getClassNameDao());
+            additionalImportsEntityBase.add(targetEntity.getJavaPackageDao() + "." + targetEntity.getClassNameDao());
         }
     }
 
