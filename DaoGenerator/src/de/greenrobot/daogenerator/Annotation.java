@@ -52,4 +52,9 @@ public class Annotation {
     public Map<String, String> getParameters() {
         return parameters;
     }
+
+    public Annotation withPackage(String _package) {
+        this._package = _package;
+        return this;
+    }
 }
