@@ -78,6 +78,10 @@ public class QueryBuilder<T> {
         }
     }
 
+    public String getTablePrefix() {
+        return tablePrefix;
+    }
+
     /**
      * Adds the given conditions to the where clause using an logical AND. To create new conditions, use the properties
      * given in the generated dao classes.
