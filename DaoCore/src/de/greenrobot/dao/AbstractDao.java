@@ -22,7 +22,6 @@ import android.database.CursorWindow;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -661,10 +660,14 @@ public abstract class AbstractDao<T, K> {
     }
 
     public static List<String> deserializeStringList(String stringList) {
-        if(stringList == null) {
-            return Lists.newArrayList();
+        List<String> list = new ArrayList<String>();
+        if (stringList != null) {
+            String[] split = StringUtils.split(stringList, ",");
+            for (String s : split) {
+                list.add(s);
+            }
         }
-        return Lists.newArrayList(StringUtils.split(stringList, ","));
+        return list;
     }
 
     public static String serializeStringList(List<String> items) {
