@@ -152,8 +152,8 @@ public class DbUtils {
         try {
             return serialize(o);
         } catch(IOException ioe) {
-            Log.d("DBUTIL", "error" + ioe == null ? "null" : ioe.getMessage());
-            return null;
+            Log.e("DBUTIL", "error" + ioe == null ? "null" : ioe.getMessage());
+            throw new RuntimeException(ioe == null ? "cannot serialize object. FATAL:" : "cannot serialize object, FATAL: " + ioe.getMessage());
         }
     }
 
