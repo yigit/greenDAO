@@ -28,6 +28,8 @@ import java.io.*;
 // TODO add unit tests
 public class DbUtils {
 
+    private static ExceptionListener exceptionListener;
+
     public static void vacuum(SQLiteDatabase db) {
         db.execSQL("VACUUM");
     }
@@ -152,6 +154,9 @@ public class DbUtils {
         try {
             return serialize(o);
         } catch(IOException ioe) {
+            if(exceptionListener != null) {
+                exceptionListener.onSerializationError(ioe);
+            }
             Log.e("DBUTIL", "error" + ioe == null ? "null" : ioe.getMessage());
             throw new RuntimeException(ioe == null ? "cannot serialize object. FATAL:" : "cannot serialize object, FATAL: " + ioe.getMessage());
         }
@@ -174,9 +179,15 @@ public class DbUtils {
         try {
             return deserialize(b);
         } catch(ClassNotFoundException cnfe) {
-            return null;
+            if(exceptionListener != null) {
+                exceptionListener.onDeserializationError(cnfe);
+            }
+            throw new RuntimeException("inconsisitent db detected");
         } catch(IOException ioe) {
-            return null;
+            if(exceptionListener != null) {
+                exceptionListener.onDeserializationError(ioe);
+            }
+            throw new RuntimeException("inconsisitent db detected");
         }
     }
 
@@ -189,5 +200,15 @@ public class DbUtils {
                 //
             }
         }
+    }
+
+    public static void setExceptionListener(ExceptionListener exceptionListener) {
+        DbUtils.exceptionListener = exceptionListener;
+    }
+
+    public static interface ExceptionListener {
+        public void onSerializationError(IOException ioException);
+        public void onDeserializationError(ClassNotFoundException cnfException);
+        public void onDeserializationError(IOException ioException);
     }
 }
