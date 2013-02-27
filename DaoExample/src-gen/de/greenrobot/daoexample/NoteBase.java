@@ -132,7 +132,11 @@ abstract public class NoteBase {
 
     public NoteActivity.Gender getGender() {
         if(gender == null && __gender != null) {
-           gender  = NoteActivity.Gender.values()[__gender];
+           try {
+               gender = NoteActivity.Gender.values()[__gender];
+           } catch(Throwable t) {
+               //silent fail
+           }
         }
         return gender;
     }
