@@ -284,6 +284,9 @@ property>${property.javaType} ${property.propertyName}<#if property_has_next>, <
 
 </#if>
     public void updateNotNull(${entity.className} other) {
+        if(this == other) {
+            return;//both came from db, no need to run this.
+        }
         <#list entity.properties as property>
             <#if property.serialized??>
         //serialized
@@ -338,7 +341,9 @@ ${keepMethods!}    // KEEP METHODS END
     public void onBeforeSave() {
         //you can override this method and do some stuff if you want to :)
         <#list entity.serializedProperties as serialization>
-        ${serialization.property.propertyName} = DbUtils.serializeObject(${serialization.propertyName});
+        if(${serialization.propertyName} != null) {//if property is nulled, its setter will already null the byte array.
+            ${serialization.property.propertyName} = DbUtils.serializeObject(${serialization.propertyName});
+        }
         </#list>
 
     }
