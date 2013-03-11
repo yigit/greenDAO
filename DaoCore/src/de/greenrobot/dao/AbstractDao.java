@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -121,6 +122,39 @@ public abstract class AbstractDao<T, K> {
         String[] keyArray = new String[] { key.toString() };
         Cursor cursor = db.rawQuery(sql, keyArray);
         return loadUniqueAndCloseCursor(cursor);
+    }
+
+    /**
+     * loads all entities given the key.
+     * it first checks identity scope to minimize # of queries
+     * keys might be sorted differently in the response.
+     * @param keys
+     * @return
+     */
+    public List<T> loadAll(Collection<K> keys) {
+        assertSinglePk();
+        if (keys.size() == 0) {
+            return new ArrayList<T>(0);
+        }
+        ArrayList<T> result = new ArrayList<T>(keys.size());
+        ArrayList<K> missing = new ArrayList<K>();
+        if (identityScope != null) {
+            for(K key : keys) {
+                T entity = identityScope.get(key);
+                if (entity != null) {
+                    result.add(entity);
+                } else {
+                    //these should go to db.
+                    missing.add(key);
+                }
+            }
+        }
+        if(missing.size() > 0) {
+            //for some, go to db.
+            QueryBuilder<T> qb = queryBuilder();
+            result.addAll(qb.where(getPkProperty().in(missing)).list());
+        }
+        return result;
     }
 
     public T loadByRowId(long rowId) {
