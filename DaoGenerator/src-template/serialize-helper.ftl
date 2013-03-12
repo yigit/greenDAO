@@ -3,7 +3,7 @@
     <@print_annotations stub.getterAnnotations, "    "/>
     public ${stub.className} get${stub.propertyName?cap_first}() {
         if(${stub.propertyName} == null && ${stub.property.propertyName} != null) {
-           ${stub.propertyName}  = (${stub.className}) DbUtils.deserializeObject(${stub.property.propertyName});
+           ${stub.propertyName}  = (${stub.className}) DbUtils.deserializeObject(${stub.property.propertyName}, ${stub.genericClassName}.class);
            ${stub.property.propertyName} = null; //clear memory, before save, we'll re-serialize anyways if needed
         }
         return ${stub.propertyName};

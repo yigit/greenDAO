@@ -29,6 +29,8 @@ import java.io.*;
 public class DbUtils {
 
     private static ExceptionListener exceptionListener;
+    private static PerfListener perfListener;
+    private static CustomSerializeAndDeserializer customSerializeAndDeserializer;
 
     public static void vacuum(SQLiteDatabase db) {
         db.execSQL("VACUUM");
@@ -133,7 +135,10 @@ public class DbUtils {
         }
     }
 
-    public static byte[] serialize(Object o) throws IOException {
+    public static byte[] serialize(Object o, boolean ignoreCustomSerializer) throws IOException {
+        if(ignoreCustomSerializer == false && customSerializeAndDeserializer != null) {
+            return customSerializeAndDeserializer.serialize(o);
+        }
         ByteArrayOutputStream bos = null;
         try {
             ObjectOutput out = null;
@@ -152,7 +157,7 @@ public class DbUtils {
             return null;
         }
         try {
-            return serialize(o);
+            return serialize(o, false);
         } catch(IOException ioe) {
             if(exceptionListener != null) {
                 exceptionListener.onSerializationError(ioe);
@@ -162,7 +167,10 @@ public class DbUtils {
         }
     }
 
-    public static Object deserialize(byte[] b) throws IOException, ClassNotFoundException {
+    public static Object deserialize(byte[] b, Class klass, boolean ignoreCustomDeserializer) throws IOException, ClassNotFoundException {
+        if(ignoreCustomDeserializer == false && customSerializeAndDeserializer != null) {
+            return customSerializeAndDeserializer.deserialize(b, klass);
+        }
         ObjectInputStream in = null;
         try {
             in = new ObjectInputStream(new ByteArrayInputStream(b));
@@ -172,12 +180,15 @@ public class DbUtils {
         }
     }
 
-    public static Object deserializeObject(byte[] b) {
+    public static Object deserializeObject(byte[] b, Class klass) {
         if(b == null) {
             return null;
         }
         try {
-            return deserialize(b);
+            if(perfListener != null) {
+                perfListener.onStartDeserialization(klass);
+            }
+            return deserialize(b, klass,false);
         } catch(ClassNotFoundException cnfe) {
             if(exceptionListener != null) {
                 exceptionListener.onDeserializationError(cnfe);
@@ -188,6 +199,16 @@ public class DbUtils {
                 exceptionListener.onDeserializationError(ioe);
             }
             throw new RuntimeException("inconsisitent db detected");
+        } catch (Exception e) {
+            if(exceptionListener != null) {
+                exceptionListener.onDeserializationError(e);
+            }
+            throw new RuntimeException("inconsisitent db detected");
+        }
+        finally {
+            if(perfListener != null) {
+                perfListener.onFinishDeserialization();
+            }
         }
     }
 
@@ -206,9 +227,29 @@ public class DbUtils {
         DbUtils.exceptionListener = exceptionListener;
     }
 
+    public static void setPerfListener(PerfListener perfListener) {
+        DbUtils.perfListener = perfListener;
+    }
+
+    public static void setCustomSerializeAndDeserializer(CustomSerializeAndDeserializer customSerializeAndDeserializer) {
+        DbUtils.customSerializeAndDeserializer = customSerializeAndDeserializer;
+    }
+
     public static interface ExceptionListener {
         public void onSerializationError(IOException ioException);
         public void onDeserializationError(ClassNotFoundException cnfException);
         public void onDeserializationError(IOException ioException);
+        public void onDeserializationError(Exception anyException);
     }
+
+    public static interface PerfListener {
+        public void onStartDeserialization(Class klass);
+        public void onFinishDeserialization();
+    }
+
+    public static interface CustomSerializeAndDeserializer {
+        public Object deserialize(byte[] b, Class klass) throws IOException, ClassNotFoundException;
+        public byte[] serialize(Object o) throws IOException;
+    }
+
 }
