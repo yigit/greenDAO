@@ -157,6 +157,9 @@ public class DbUtils {
             return null;
         }
         try {
+            if(perfListener != null) {
+                perfListener.onStartSerialization();
+            }
             return serialize(o, false);
         } catch(IOException ioe) {
             if(exceptionListener != null) {
@@ -164,6 +167,10 @@ public class DbUtils {
             }
             Log.e("DBUTIL", "error" + ioe == null ? "null" : ioe.getMessage());
             throw new RuntimeException(ioe == null ? "cannot serialize object. FATAL:" : "cannot serialize object, FATAL: " + ioe.getMessage());
+        } finally {
+            if(perfListener != null) {
+                perfListener.onFinishSerialization();
+            }
         }
     }
 
@@ -245,6 +252,8 @@ public class DbUtils {
     public static interface PerfListener {
         public void onStartDeserialization(Class klass);
         public void onFinishDeserialization();
+        public void onStartSerialization();
+        public void onFinishSerialization();
     }
 
     public static interface CustomSerializeAndDeserializer {
