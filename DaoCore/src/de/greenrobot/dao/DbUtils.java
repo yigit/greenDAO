@@ -16,19 +16,21 @@
 
 package de.greenrobot.dao;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import java.io.*;
 
 /** Database utils, for example to execute SQL scripts */
 // TODO add unit tests
 public class DbUtils {
+
+    private static ExceptionListener exceptionListener;
+    private static PerfListener perfListener;
+    private static CustomSerializeAndDeserializer customSerializeAndDeserializer;
 
     public static void vacuum(SQLiteDatabase db) {
         db.execSQL("VACUUM");
@@ -36,7 +38,7 @@ public class DbUtils {
 
     /**
      * Calls {@link #executeSqlScript(Context, SQLiteDatabase, String, boolean)} with transactional set to true.
-     * 
+     *
      * @return number of statements executed.
      */
     public static int executeSqlScript(Context context, SQLiteDatabase db, String assetFilename) throws IOException {
@@ -48,7 +50,7 @@ public class DbUtils {
      * multiple SQL statements. Statements are split using a simple regular expression (something like
      * "semicolon before a line break"), not by analyzing the SQL syntax. This will work for many SQL files, but check
      * yours.
-     * 
+     *
      * @return number of statements executed.
      */
     public static int executeSqlScript(Context context, SQLiteDatabase db, String assetFilename, boolean transactional)
@@ -91,7 +93,7 @@ public class DbUtils {
 
     /**
      * Copies all available data from in to out without closing any stream.
-     * 
+     *
      * @return number of bytes copied
      */
     public static int copyAllBytes(InputStream in, OutputStream out) throws IOException {
@@ -131,6 +133,132 @@ public class DbUtils {
         } finally {
             cursor.close();
         }
+    }
+
+    public static byte[] serialize(Object o, boolean ignoreCustomSerializer) throws IOException {
+        if(ignoreCustomSerializer == false && customSerializeAndDeserializer != null) {
+            return customSerializeAndDeserializer.serialize(o);
+        }
+        ByteArrayOutputStream bos = null;
+        try {
+            ObjectOutput out = null;
+            bos = new ByteArrayOutputStream();
+            out = new ObjectOutputStream(bos);
+            out.writeObject(o);
+            // Get the bytes of the serialized object
+            return bos.toByteArray();
+        } finally {
+            closeQuietly(bos);
+        }
+    }
+
+    public static byte[] serializeObject(Object o) {
+        if(o == null) {
+            return null;
+        }
+        try {
+            if(perfListener != null) {
+                perfListener.onStartSerialization();
+            }
+            return serialize(o, false);
+        } catch(IOException ioe) {
+            if(exceptionListener != null) {
+                exceptionListener.onSerializationError(ioe);
+            }
+            Log.e("DBUTIL", "error" + ioe == null ? "null" : ioe.getMessage());
+            throw new RuntimeException(ioe == null ? "cannot serialize object. FATAL:" : "cannot serialize object, FATAL: " + ioe.getMessage());
+        } finally {
+            if(perfListener != null) {
+                perfListener.onFinishSerialization();
+            }
+        }
+    }
+
+    public static Object deserialize(byte[] b, Class klass, boolean ignoreCustomDeserializer) throws IOException, ClassNotFoundException {
+        if(ignoreCustomDeserializer == false && customSerializeAndDeserializer != null) {
+            return customSerializeAndDeserializer.deserialize(b, klass);
+        }
+        ObjectInputStream in = null;
+        try {
+            in = new ObjectInputStream(new ByteArrayInputStream(b));
+            return in.readObject();
+        } finally {
+            closeQuietly(in);
+        }
+    }
+
+    public static Object deserializeObject(byte[] b, Class klass) {
+        if(b == null) {
+            return null;
+        }
+        try {
+            if(perfListener != null) {
+                perfListener.onStartDeserialization(klass);
+            }
+            return deserialize(b, klass,false);
+        } catch(ClassNotFoundException cnfe) {
+            if(exceptionListener != null) {
+                exceptionListener.onDeserializationError(cnfe);
+            }
+            throw new RuntimeException("inconsisitent db detected");
+        } catch(IOException ioe) {
+            if(exceptionListener != null) {
+                exceptionListener.onDeserializationError(ioe);
+            }
+            throw new RuntimeException("inconsisitent db detected");
+        } catch (Exception e) {
+            if(exceptionListener != null) {
+                exceptionListener.onDeserializationError(e);
+            }
+            throw new RuntimeException("inconsisitent db detected");
+        }
+        finally {
+            if(perfListener != null) {
+                perfListener.onFinishDeserialization();
+            }
+        }
+    }
+
+    private static void closeQuietly(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            }
+            catch (Exception e) {
+                //
+            }
+        }
+    }
+
+    public static void setExceptionListener(ExceptionListener exceptionListener) {
+        DbUtils.exceptionListener = exceptionListener;
+    }
+
+    public static void setPerfListener(PerfListener perfListener) {
+        DbUtils.perfListener = perfListener;
+    }
+
+    public static void setCustomSerializeAndDeserializer(CustomSerializeAndDeserializer customSerializeAndDeserializer) {
+        DbUtils.customSerializeAndDeserializer = customSerializeAndDeserializer;
+    }
+
+    public static interface ExceptionListener {
+        public void onSerializationError(IOException ioException);
+        public void onDeserializationError(ClassNotFoundException cnfException);
+        public void onDeserializationError(IOException ioException);
+        public void onDeserializationError(Exception anyException);
+    }
+
+    public static interface PerfListener {
+        public void onStartDeserialization(Class klass);
+        public void onFinishDeserialization();
+        public void onStartSerialization();
+        public void onFinishSerialization();
+    }
+
+    public static interface CustomSerializeAndDeserializer {
+        public Object deserialize(byte[] b, Class klass) throws IOException, ClassNotFoundException;
+        public byte[] serialize(Object o) throws IOException;
     }
 
 }

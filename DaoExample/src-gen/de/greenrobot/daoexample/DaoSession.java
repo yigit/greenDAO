@@ -21,7 +21,7 @@ import de.greenrobot.daoexample.OrderDao;
 
 /**
  * {@inheritDoc}
- * 
+ *
  * @see de.greenrobot.dao.AbstractDaoSession
  */
 public class DaoSession extends AbstractDaoSession {
@@ -55,12 +55,19 @@ public class DaoSession extends AbstractDaoSession {
         registerDao(Customer.class, customerDao);
         registerDao(Order.class, orderDao);
     }
-    
+
     public void clear() {
         noteDaoConfig.getIdentityScope().clear();
         customerDaoConfig.getIdentityScope().clear();
         orderDaoConfig.getIdentityScope().clear();
     }
+
+    public void deleteAllData() {
+        noteDao.deleteAll();
+        customerDao.deleteAll();
+        orderDao.deleteAll();
+    }
+
 
     public NoteDao getNoteDao() {
         return noteDao;

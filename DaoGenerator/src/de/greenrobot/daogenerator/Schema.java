@@ -2,7 +2,7 @@
  * Copyright (C) 2011 Markus Junginger, greenrobot (http://greenrobot.de)
  *
  * This file is part of greenDAO Generator.
- * 
+ *
  * greenDAO Generator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -11,7 +11,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with greenDAO Generator.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * The "root" model class to which you can add entities to.
- * 
+ *
  * @see <a href="http://greendao-orm.com/documentation/modelling-entities/">Modelling Entities (Documentation page)</a>
  */
 public class Schema {
@@ -66,6 +66,7 @@ public class Schema {
         propertyToDbType.put(PropertyType.String, "TEXT");
         propertyToDbType.put(PropertyType.ByteArray, "BLOB");
         propertyToDbType.put(PropertyType.Date, "INTEGER");
+        propertyToDbType.put(PropertyType.StringList, "TEXT");
 
         propertyToJavaTypeNotNull = new HashMap<PropertyType, String>();
         propertyToJavaTypeNotNull.put(PropertyType.Boolean, "boolean");
@@ -78,6 +79,7 @@ public class Schema {
         propertyToJavaTypeNotNull.put(PropertyType.String, "String");
         propertyToJavaTypeNotNull.put(PropertyType.ByteArray, "byte[]");
         propertyToJavaTypeNotNull.put(PropertyType.Date, "java.util.Date");
+        propertyToJavaTypeNotNull.put(PropertyType.StringList, "java.util.List<String>");
 
         propertyToJavaTypeNullable = new HashMap<PropertyType, String>();
         propertyToJavaTypeNullable.put(PropertyType.Boolean, "Boolean");
@@ -90,6 +92,7 @@ public class Schema {
         propertyToJavaTypeNullable.put(PropertyType.String, "String");
         propertyToJavaTypeNullable.put(PropertyType.ByteArray, "byte[]");
         propertyToJavaTypeNullable.put(PropertyType.Date, "java.util.Date");
+        propertyToJavaTypeNullable.put(PropertyType.StringList, "java.util.List<String>");
     }
 
     /**

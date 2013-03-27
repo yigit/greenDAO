@@ -22,9 +22,9 @@ import android.database.Cursor;
 
 /**
  * A repeatable query returning entities.
- * 
+ *
  * @author Markus
- * 
+ *
  * @param <T>
  *            The enitity class the query will return results for.
  */
@@ -32,6 +32,8 @@ import android.database.Cursor;
 // TODO Make parameters setable by Property (if unique in paramaters)
 // TODO Query for PKs/ROW IDs
 public class Query<T> extends AbstractQuery<T> {
+    private static QueryListener queryListener;
+
     private int limitPosition = -1;
     private int offsetPosition = -1;
 
@@ -89,8 +91,14 @@ public class Query<T> extends AbstractQuery<T> {
 
     /** Executes the query and returns the result as a list containing all entities loaded into memory. */
     public List<T> list() {
+        long start = System.nanoTime();
         Cursor cursor = dao.db.rawQuery(sql, parameters);
-        return dao.loadAllAndCloseCursor(cursor);
+        long queryEnd = System.nanoTime();
+        List<T> result = dao.loadAllAndCloseCursor(cursor);
+        if(queryListener != null) {
+            queryListener.onList(this, queryEnd - start, System.nanoTime() - start);
+        }
+        return result;
     }
 
     /**
@@ -99,8 +107,13 @@ public class Query<T> extends AbstractQuery<T> {
      * cursor again.Make sure to close it to close the underlying cursor.
      */
     public LazyList<T> listLazy() {
+        long start = System.nanoTime();
         Cursor cursor = dao.db.rawQuery(sql, parameters);
-        return new LazyList<T>(dao, cursor, true);
+        LazyList<T> result = new LazyList<T>(dao, cursor, true);
+        if(queryListener != null) {
+            queryListener.onListLazy(this, System.nanoTime() - start);
+        }
+        return result;
     }
 
     /**
@@ -108,8 +121,13 @@ public class Query<T> extends AbstractQuery<T> {
      * sure to close the list to close the underlying cursor.
      */
     public LazyList<T> listLazyUncached() {
+        long start = System.nanoTime();
         Cursor cursor = dao.db.rawQuery(sql, parameters);
-        return new LazyList<T>(dao, cursor, false);
+        LazyList<T> result = new LazyList<T>(dao, cursor, false);
+        if(queryListener != null) {
+            queryListener.onListLazy(this, System.nanoTime() - start);
+        }
+        return result;
     }
 
     /**
@@ -122,19 +140,25 @@ public class Query<T> extends AbstractQuery<T> {
 
     /**
      * Executes the query and returns the unique result or null.
-     * 
+     *
      * @throws DaoException
      *             if the result is not unique
      * @return Entity or null if no matching entity was found
      */
     public T unique() {
+        long start = System.nanoTime();
         Cursor cursor = dao.db.rawQuery(sql, parameters);
-        return dao.loadUniqueAndCloseCursor(cursor);
+        long queryEnd = System.nanoTime();
+        T result =  dao.loadUniqueAndCloseCursor(cursor);
+        if(queryListener != null) {
+            queryListener.onUnique(this, queryEnd - start, System.nanoTime() - start);
+        }
+        return result;
     }
 
     /**
      * Executes the query and returns the unique result (never null).
-     * 
+     *
      * @throws DaoException
      *             if the result is not unique or no entity was found
      * @return Entity
@@ -147,4 +171,13 @@ public class Query<T> extends AbstractQuery<T> {
         return entity;
     }
 
+    public static void setQueryListener(QueryListener listener) {
+        Query.queryListener = listener;
+    }
+
+    public static interface QueryListener {
+        public void onList(Query query, long dbQueryTimeInNS, long totalExecutionTimeInNS);
+        public void onListLazy(Query query, long dbQueryTimeInNS);
+        public void onUnique(Query query, long dbQueryTimeInNS, long totalExecutionTimeInNS);
+    }
 }

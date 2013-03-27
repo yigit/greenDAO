@@ -52,9 +52,15 @@ public class Entity {
     private final List<ToOne> toOneRelations;
     private final List<ToMany> toManyRelations;
     private final List<ToMany> incomingToManyRelations;
+    private final Collection<String> additionalImportsEntityBase;
     private final Collection<String> additionalImportsEntity;
     private final Collection<String> additionalImportsDao;
     private final List<String> interfacesToImplement;
+    private final List<Annotation> annotations;
+    private final List<Annotation> emptyConstructorAnnotations;
+    private final List<Annotation> fullConstructorAnnotations;
+    private final List<SerializedProperty> serializedProperties;
+    private final List<EnumProperty> enumProperties;
 
     private String tableName;
     private String classNameDao;
@@ -65,6 +71,7 @@ public class Entity {
     private Property pkProperty;
     private String pkType;
     private String superclass;
+
 
     private boolean protobuf;
     private boolean constructors;
@@ -86,9 +93,15 @@ public class Entity {
         toOneRelations = new ArrayList<ToOne>();
         toManyRelations = new ArrayList<ToMany>();
         incomingToManyRelations = new ArrayList<ToMany>();
+        additionalImportsEntityBase = new TreeSet<String>();
         additionalImportsEntity = new TreeSet<String>();
         additionalImportsDao = new TreeSet<String>();
         interfacesToImplement = new ArrayList<String>();
+        annotations = new ArrayList<Annotation>();
+        emptyConstructorAnnotations = new ArrayList<Annotation>();
+        fullConstructorAnnotations = new ArrayList<Annotation>();
+        serializedProperties = new ArrayList<SerializedProperty>();
+        enumProperties = new ArrayList<EnumProperty>();
         constructors = true;
     }
 
@@ -131,6 +144,70 @@ public class Entity {
     public PropertyBuilder addDateProperty(String propertyName) {
         return addProperty(PropertyType.Date, propertyName);
     }
+
+    public PropertyBuilder addStringList(String propertyName) {
+        return addProperty(PropertyType.StringList, propertyName);
+    }
+
+    public SerializedProperty addSerializedProperty(Property property, String propertyName, String className) {
+        SerializedProperty serializedProperty = new SerializedProperty(property, propertyName, className);
+        this.serializedProperties.add(serializedProperty);
+        return serializedProperty;
+    }
+
+    public SerializedProperty addSerializedProperty(String propertyName, String className) {
+        return addSerializedProperty(propertyName, className, null);
+
+    }
+    public SerializedProperty addSerializedProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
+        PropertyBuilder pb = this.addProperty(PropertyType.ByteArray, "__" + propertyName);
+        if(basePropertyAnnotation != null) {
+                pb.addSetterGetterAnnotation(basePropertyAnnotation);
+        }
+        return this.addSerializedProperty(pb.getProperty(), propertyName, className);
+    }
+
+    public EnumProperty addEnumProperty(Property property, String propertyName, String className) {
+        EnumProperty enumProperty = new EnumProperty(property, propertyName, className);
+        this.enumProperties.add(enumProperty);
+        return enumProperty;
+    }
+
+    public EnumProperty addEnumProperty(String propertyName, String className) {
+        return addEnumProperty(propertyName, className, null);
+    }
+    public EnumProperty addEnumProperty(String propertyName, String className, Annotation basePropertyAnnotation) {
+        PropertyBuilder pb = this.addProperty(PropertyType.Int, "__" + propertyName);
+        if(basePropertyAnnotation != null) {
+                pb.addSetterGetterAnnotation(basePropertyAnnotation);
+        }
+        return this.addEnumProperty(pb.getProperty(), propertyName, className);
+    }
+
+    public List<SerializedProperty> getSerializedProperties() {
+        return serializedProperties;
+    }
+
+    public List<EnumProperty> getEnumProperties() {
+        return enumProperties;
+    }
+
+    public Entity addAnnotation(Annotation annotation) {
+        this.annotations.add(annotation);
+        return this;
+    }
+
+    public Entity addEmptyConstructorAnnotation(Annotation annotation) {
+        this.emptyConstructorAnnotations.add(annotation);
+        return this;
+    }
+
+    public Entity addFullConstructorAnnotation(Annotation annotation) {
+        this.fullConstructorAnnotations.add(annotation);
+        return this;
+    }
+
+
 
     public PropertyBuilder addProperty(PropertyType propertyType, String propertyName) {
         if (!propertyNames.add(propertyName)) {
@@ -406,12 +483,16 @@ public class Entity {
         return hasKeepSections;
     }
 
-    public Collection<String> getAdditionalImportsEntity() {
-        return additionalImportsEntity;
+    public Collection<String> getAdditionalImportsEntityBase() {
+        return additionalImportsEntityBase;
     }
 
     public Collection<String> getAdditionalImportsDao() {
         return additionalImportsDao;
+    }
+
+    public Collection<String> getAdditionalImportsEntity() {
+        return additionalImportsEntity;
     }
 
     public void setHasKeepSections(Boolean hasKeepSections) {
@@ -430,6 +511,18 @@ public class Entity {
 
     public void implementsSerializable() {
         interfacesToImplement.add("java.io.Serializable");
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public List<Annotation> getEmptyConstructorAnnotations() {
+        return emptyConstructorAnnotations;
+    }
+
+    public List<Annotation> getFullConstructorAnnotations() {
+        return fullConstructorAnnotations;
     }
 
     public String getSuperclass() {
@@ -578,7 +671,7 @@ public class Entity {
 
     private void init3rdPassAdditionalImports() {
         if (active && !javaPackage.equals(javaPackageDao)) {
-            additionalImportsEntity.add(javaPackageDao + "." + classNameDao);
+            additionalImportsEntityBase.add(javaPackageDao + "." + classNameDao);
         }
 
         for (ToOne toOne : toOneRelations) {
@@ -594,14 +687,52 @@ public class Entity {
             Entity targetEntity = toMany.getTargetEntity();
             checkAdditionalImportsEntityTargetEntity(targetEntity);
         }
+
+        for(Property property : properties) {
+            checkAdditionalImportsProperty(property);
+        }
+        
+        for(SerializedProperty property : serializedProperties) {
+            checkAdditionalImportsSerializedProperty(property);
+        }
+
+        checkAddionalImportsAnnotaion(annotations);
+
+        //for entity itself not the base class. we need to import all class annotations
+        for(Annotation annotation : annotations) {
+            if(annotation.getPackage() != null) {
+                additionalImportsEntity.add(annotation.getPackage());
+            }
+        }
+
+    }
+
+    private void checkAdditionalImportsProperty(Property property) {
+        checkAddionalImportsAnnotaion(property.getFieldAnnotations());
+        checkAddionalImportsAnnotaion(property.getGetterAnnotations());
+        checkAddionalImportsAnnotaion(property.getSetterAnnotations());
+    }
+    
+    private void checkAdditionalImportsSerializedProperty(SerializedProperty property) {
+        checkAddionalImportsAnnotaion(property.getFieldAnnotations());
+        checkAddionalImportsAnnotaion(property.getGetterAnnotations());
+        checkAddionalImportsAnnotaion(property.getSetterAnnotations());
+    }
+
+    private void checkAddionalImportsAnnotaion(List<Annotation> annotations) {
+        for(Annotation annotation : annotations) {
+            if(annotation.getPackage() != null) {
+                additionalImportsEntityBase.add(annotation.getPackage());
+            }
+        }
     }
 
     private void checkAdditionalImportsEntityTargetEntity(Entity targetEntity) {
         if (!targetEntity.getJavaPackage().equals(javaPackage)) {
-            additionalImportsEntity.add(targetEntity.getJavaPackage() + "." + targetEntity.getClassName());
+            additionalImportsEntityBase.add(targetEntity.getJavaPackage() + "." + targetEntity.getClassName());
         }
         if (!targetEntity.getJavaPackageDao().equals(javaPackage)) {
-            additionalImportsEntity.add(targetEntity.getJavaPackageDao() + "." + targetEntity.getClassNameDao());
+            additionalImportsEntityBase.add(targetEntity.getJavaPackageDao() + "." + targetEntity.getClassNameDao());
         }
     }
 

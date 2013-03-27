@@ -16,24 +16,26 @@
 
 package de.greenrobot.dao;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import android.database.CrossProcessCursor;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Base class for all DAOs: Implements entity operations like insert, load, delete, and query.
- * 
+ *
  * This class is thread-safe.
- * 
+ *
  * @author Markus
- * 
+ *
  * @param <T>
  *            Entity type
  * @param <K>
@@ -100,7 +102,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Loads and entity for the given PK.
-     * 
+     *
      * @param key
      *            a PK value or null
      * @return The entity or null, if no entity matched the PK value
@@ -120,6 +122,39 @@ public abstract class AbstractDao<T, K> {
         String[] keyArray = new String[] { key.toString() };
         Cursor cursor = db.rawQuery(sql, keyArray);
         return loadUniqueAndCloseCursor(cursor);
+    }
+
+    /**
+     * loads all entities given the key.
+     * it first checks identity scope to minimize # of queries
+     * keys might be sorted differently in the response.
+     * @param keys
+     * @return
+     */
+    public List<T> loadAll(Collection<K> keys) {
+        assertSinglePk();
+        if (keys.size() == 0) {
+            return new ArrayList<T>(0);
+        }
+        ArrayList<T> result = new ArrayList<T>(keys.size());
+        ArrayList<K> missing = new ArrayList<K>();
+        if (identityScope != null) {
+            for(K key : keys) {
+                T entity = identityScope.get(key);
+                if (entity != null) {
+                    result.add(entity);
+                } else {
+                    //these should go to db.
+                    missing.add(key);
+                }
+            }
+        }
+        if(missing.size() > 0) {
+            //for some, go to db.
+            QueryBuilder<T> qb = queryBuilder();
+            result.addAll(qb.where(getPkProperty().in(missing)).list());
+        }
+        return result;
     }
 
     public T loadByRowId(long rowId) {
@@ -172,7 +207,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Inserts the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to insert.
      */
@@ -182,7 +217,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Inserts the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to insert.
      */
@@ -193,7 +228,7 @@ public abstract class AbstractDao<T, K> {
     /**
      * Inserts the given entities in the database using a transaction. The given entities will become tracked if the PK
      * is set.
-     * 
+     *
      * @param entities
      *            The entities to insert.
      * @param setPrimaryKey
@@ -207,7 +242,7 @@ public abstract class AbstractDao<T, K> {
     /**
      * Inserts or replaces the given entities in the database using a transaction. The given entities will become
      * tracked if the PK is set.
-     * 
+     *
      * @param entities
      *            The entities to insert.
      * @param setPrimaryKey
@@ -220,7 +255,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Inserts or replaces the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to insert.
      */
@@ -230,7 +265,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Inserts or replaces the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to insert.
      */
@@ -269,7 +304,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Insert an entity into the table associated with a concrete DAO.
-     * 
+     *
      * @return row ID of newly inserted entity
      */
     public long insert(T entity) {
@@ -279,7 +314,7 @@ public abstract class AbstractDao<T, K> {
     /**
      * Insert an entity into the table associated with a concrete DAO <b>without</b> setting key property. Warning: This
      * may be faster, but the entity should not be used anymore. The entity also won't be attached to identy scope.
-     * 
+     *
      * @return row ID of newly inserted entity
      */
     public long insertWithoutSettingPk(T entity) {
@@ -292,7 +327,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Insert an entity into the table associated with a concrete DAO.
-     * 
+     *
      * @return row ID of newly inserted entity
      */
     public long insertOrReplace(T entity) {
@@ -465,7 +500,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Deletes the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to delete.
      */
@@ -505,7 +540,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Deletes the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to delete.
      */
@@ -563,7 +598,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Attaches the entity to the identity scope. Calls attachEntity(T entity).
-     * 
+     *
      * @param key
      *            Needed only for identity scope, pass null if there's none.
      * @param entity
@@ -582,7 +617,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Sub classes with relations additionally set the DaoMaster here.
-     * 
+     *
      * @param entity
      *            The entitiy to attach
      * */
@@ -591,7 +626,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Updates the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to insert.
      */
@@ -621,7 +656,7 @@ public abstract class AbstractDao<T, K> {
 
     /**
      * Updates the given entities in the database using a transaction.
-     * 
+     *
      * @param entities
      *            The entities to update.
      */
@@ -656,6 +691,24 @@ public abstract class AbstractDao<T, K> {
     /** Gets the SQLiteDatabase for custom database access. Not needed for greenDAO entities. */
     public SQLiteDatabase getDatabase() {
         return db;
+    }
+
+    public static List<String> deserializeStringList(String stringList) {
+        List<String> list = new ArrayList<String>();
+        if (stringList != null) {
+            String[] split = StringUtils.split(stringList, ",");
+            for (String s : split) {
+                list.add(s);
+            }
+        }
+        return list;
+    }
+
+    public static String serializeStringList(List<String> items) {
+        if(items == null) {
+            return null;
+        }
+        return StringUtils.join(items, ",");
     }
 
     /** Reads the values from the current position of the given cursor and returns a new entity. */
